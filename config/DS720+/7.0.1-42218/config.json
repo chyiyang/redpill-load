@@ -1,7 +1,7 @@
 {
   "os": {
     "id": "ds720p_42218",
-    "pat_url": "https://global.download.synology.com/download/DSM/release/7.0.1/42218-1/DSM_DS720%2B_42218.pat",
+    "pat_url": "https://global.download.synology.com/download/DSM/release/7.0.1/42218/DSM_DS720%2B_42218.pat",
     "sha256": "3fedba49296a019866cfa18242e633f8419af28522a6bb0e34657143399b54e0"
   },
   "files": {
