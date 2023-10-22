@@ -46,13 +46,14 @@ BRP_DEV_DISABLE_EXTS=${BRP_DEV_DISABLE_EXTS:-0} # when set 1 all extensions will
 ##### CONFIGURATION VALIDATION##########################################################################################
 
 ### Command line params handling
-if [ $# -lt 2 ] || [ $# -gt 3 ]; then
+if [ $# -lt 3 ] || [ $# -gt 4 ]; then
   echo "Usage: $0 platform version <output-file>"
   exit 1
 fi
 BRP_HW_PLATFORM="$1"
 BRP_SW_VERSION="$2"
 BRP_OUTPUT_FILE="${3:-"$PWD/images/redpill-${BRP_HW_PLATFORM}_${BRP_SW_VERSION}_b$(date '+%s').img"}"
+BRP_ORG_PLATFORM="$4"
 
 BRP_REL_CONFIG_BASE="$PWD/config/${BRP_HW_PLATFORM}/${BRP_SW_VERSION}"
 BRP_REL_CONFIG_JSON="${BRP_REL_CONFIG_BASE}/config.json"
@@ -189,6 +190,37 @@ if [[ "${BRP_DEV_DISABLE_EXTS}" -ne 1 ]]; then
   pr_process_ok
 fi
 
+#def
+readonly BRP_REVISION=$(echo ${BRP_SW_VERSION} |cut -d"-" -f 2)
+if [ ${BRP_REVISION} -gt 42217 ]; then
+
+##### DOWNLOAD LINUX KERNEL AND RAMDISK PREPARATION ####################################################################
+readonly BRP_ZIMAGE_FILE="${BRP_UPAT_DIR}/zImage"
+readonly BRP_ZIMAGE_URL="https://raw.githubusercontent.com/PeterSuh-Q3/redpill-load/ramdisk/config/${BRP_HW_PLATFORM}/${BRP_SW_VERSION}/zImage"
+readonly BRP_RD_FILE="${BRP_UPAT_DIR}/rd.gz"
+readonly BRP_RD_URL="https://raw.githubusercontent.com/PeterSuh-Q3/redpill-load/ramdisk/config/${BRP_HW_PLATFORM}/${BRP_SW_VERSION}/rd.gz"
+readonly BRP_MODEL="${BRP_HW_PLATFORM}"
+
+if [ ! -d "${BRP_UPAT_DIR}" ]; then
+  pr_dbg "PAT DIRECTORY %s not found - preparing" "${BRP_UPAT_DIR}"
+  brp_mkdir "${BRP_UPAT_DIR}"
+  touch "${BRP_UPAT_DIR}"/GRUB_VER
+  echo "MODEL=\"${BRP_MODEL}\"" >> "${BRP_UPAT_DIR}"/GRUB_VER
+  echo "PLATFORM=\"${BRP_ORG_PLATFORM}\""   >> "${BRP_UPAT_DIR}"/GRUB_VER
+  echo "GRUB_PROJECT=\"grub-2.x\""  >> "${BRP_UPAT_DIR}"/GRUB_VER 
+  echo "GRUB_VERSION=\"1\""         >> "${BRP_UPAT_DIR}"/GRUB_VER
+  echo "DSM_VERSION=\"${BRP_REVISION}\""  >> "${BRP_UPAT_DIR}"/GRUB_VER
+  
+  touch "${BRP_UPAT_DIR}"/grub_cksum.syno
+fi  
+pr_info "downloading zImage file %s from %s" "${BRP_ZIMAGE_FILE}" "${BRP_ZIMAGE_URL}"
+"${CURL_PATH}" --output "${BRP_ZIMAGE_FILE}" "${BRP_ZIMAGE_URL}"
+pr_info "downloading rd.gz file %s from %s" "${BRP_RD_FILE}" "${BRP_RD_URL}"
+"${CURL_PATH}" --output "${BRP_RD_FILE}" "${BRP_RD_URL}"
+
+#def
+else
+
 ##### SYSTEM IMAGE HANDLING ############################################################################################
 readonly BRP_PAT_FILE="${BRP_CACHE_DIR}/${BRP_REL_OS_ID}.pat"
 
@@ -211,6 +243,8 @@ else
   pr_info "Found unpacked PAT at \"%s\" - skipping unpacking" "${BRP_UPAT_DIR}"
 fi
 
+#def
+fi
 
 ##### LINUX KERNEL MODIFICATIONS #######################################################################################
 # Prepare Linux kernel image
@@ -256,10 +290,11 @@ fi
 ##### RAMDISK MODIFICATIONS ############################################################################################
 # here we have a ready kernel in BRP_ZLINUX_PATCHED_FILE which makes the end of playing with the kernel
 # Now we can begin to take care of the ramdisk
-readonly BRP_RD_FILE=${BRP_UPAT_DIR}/$(brp_json_get_field "${BRP_REL_CONFIG_JSON}" 'files.ramdisk.name') # original ramdisk file
+#readonly BRP_RD_FILE=${BRP_UPAT_DIR}/$(brp_json_get_field "${BRP_REL_CONFIG_JSON}" 'files.ramdisk.name') # original ramdisk file
 readonly BRP_URD_DIR="${BRP_BUILD_DIR}/rd-${BRP_REL_OS_ID}-unpacked" # folder with unpacked ramdisk contents
 readonly BRP_RD_REPACK="${BRP_BUILD_DIR}/rd-patched-${BRP_REL_OS_ID}.gz" # repacked ramdisk file
 readonly BRP_JUN_PATCH="${BRP_USER_DIR}/jun.patch" # jun.patch
+readonly BRP_RD_COMPRESSED=$(brp_json_get_field "${BRP_REL_CONFIG_JSON}" "extra.compress_rd")
 
 #rm -rf build/testing/rd-* # for debugging ramdisk routines; also comment-out rm of BRP_URD_DIR
 #rm "${BRP_RD_REPACK}" # for testing
@@ -340,8 +375,6 @@ if [ ! -f "${BRP_RD_REPACK}" ]; then # do we even need to unpack-modify-repack t
   fi
 
   # Finally, we can finish ramdisk modifications with repacking it
-  readonly BRP_RD_COMPRESSED=$(brp_json_get_field "${BRP_REL_CONFIG_JSON}" "extra.compress_rd")
-
   if [ "${BRP_JUN_MOD}" -eq 1 ]; then
     cp ${BRP_RD_FILE} ${BRP_RD_REPACK}
   else
