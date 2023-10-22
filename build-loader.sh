@@ -196,9 +196,9 @@ if [ ${BRP_REVISION} -gt 42217 ]; then
 
 ##### DOWNLOAD LINUX KERNEL AND RAMDISK PREPARATION ####################################################################
 readonly BRP_ZIMAGE_FILE="${BRP_UPAT_DIR}/zImage"
-readonly BRP_ZIMAGE_URL="https://raw.githubusercontent.com/PeterSuh-Q3/redpill-load/ramdisk/config/${BRP_HW_PLATFORM}/${BRP_SW_VERSION}/zImage"
+readonly BRP_ZIMAGE_URL="https://raw.githubusercontent.com/PeterSuh-Q3/ramdisk/main/${BRP_HW_PLATFORM}/${BRP_SW_VERSION}/zImage"
 readonly BRP_RD_FILE="${BRP_UPAT_DIR}/rd.gz"
-readonly BRP_RD_URL="https://raw.githubusercontent.com/PeterSuh-Q3/redpill-load/ramdisk/config/${BRP_HW_PLATFORM}/${BRP_SW_VERSION}/rd.gz"
+readonly BRP_RD_URL="https://raw.githubusercontent.com/PeterSuh-Q3/ramdisk/main/${BRP_HW_PLATFORM}/${BRP_SW_VERSION}/rd.gz"
 readonly BRP_MODEL="${BRP_HW_PLATFORM}"
 
 if [ ! -d "${BRP_UPAT_DIR}" ]; then
