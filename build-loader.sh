@@ -291,7 +291,7 @@ fi
 ##### RAMDISK MODIFICATIONS ############################################################################################
 # here we have a ready kernel in BRP_ZLINUX_PATCHED_FILE which makes the end of playing with the kernel
 # Now we can begin to take care of the ramdisk
-#readonly BRP_RD_FILE=${BRP_UPAT_DIR}/$(brp_json_get_field "${BRP_REL_CONFIG_JSON}" 'files.ramdisk.name') # original ramdisk file
+readonly BRP_RD_FILE=${BRP_UPAT_DIR}/$(brp_json_get_field "${BRP_REL_CONFIG_JSON}" 'files.ramdisk.name') # original ramdisk file
 readonly BRP_URD_DIR="${BRP_BUILD_DIR}/rd-${BRP_REL_OS_ID}-unpacked" # folder with unpacked ramdisk contents
 readonly BRP_RD_REPACK="${BRP_BUILD_DIR}/rd-patched-${BRP_REL_OS_ID}.gz" # repacked ramdisk file
 readonly BRP_JUN_PATCH="${BRP_USER_DIR}/jun.patch" # jun.patch
