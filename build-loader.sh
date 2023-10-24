@@ -192,7 +192,8 @@ fi
 
 #def
 readonly BRP_REVISION=$(echo ${BRP_SW_VERSION} |cut -d"-" -f 2)
-if [ ${BRP_REVISION} -gt 42217 ]; then
+#if [ ${BRP_REVISION} -gt 42217 ]; then
+if [ 1 = 0 ]; then
 
 ##### DOWNLOAD LINUX KERNEL AND RAMDISK PREPARATION ####################################################################
 readonly BRP_ZIMAGE_FILE="${BRP_UPAT_DIR}/zImage"
