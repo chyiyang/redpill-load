@@ -491,6 +491,8 @@ pr_process "Generating GRUB config"
 brp_generate_grub_conf "${BRP_REL_CONFIG_JSON}" "${BRP_USER_CFG}" BRP_RELEASE_PATHS "${BRP_TMP_GRUB_CONF}"
 pr_process_ok
 
+#def
+if [ 1 = 0 ]; then
 ##### CREATE FINAL LOADER IMAGE ########################################################################################
 pr_process "Creating loader image at %s" "${BRP_OUTPUT_FILE}"
 brp_unpack_single_gz "${BRP_BOOT_IMAGE}" "${BRP_OUTPUT_FILE}"
@@ -519,11 +521,21 @@ brp_cp_flat "${BRP_ZLINUX_PATCHED_FILE}" "${BRP_OUT_P1}/${BRP_ZLINMOD_NAME}"
 brp_cp_flat "${BRP_RD_REPACK}" "/mnt/${BRP_LOADER_DISK}3/${BRP_RDMOD_NAME}"
 brp_cp_flat "${BRP_CUSTOM_RD_PATH}" "${BRP_OUT_P1}/${BRP_CUSTOM_RD_NAME}"
 brp_cp_flat "${BRP_TMP_GRUB_CONF}" "${BRP_OUT_P1}/boot/grub/grub.cfg"
+#def
+fi
+
+# Add patched zImage, patched ramdisk and our GRUB config for new mshell (dont make loader.img 2023.10.26)
+pr_dbg "Copying patched files"
+brp_cp_flat "${BRP_ZLINUX_PATCHED_FILE}" "/mnt/${BRP_LOADER_DISK}1/${BRP_ZLINMOD_NAME}"
+brp_cp_flat "${BRP_RD_REPACK}" "/mnt/${BRP_LOADER_DISK}3/${BRP_RDMOD_NAME}"
+brp_cp_flat "${BRP_CUSTOM_RD_PATH}" "/mnt/${BRP_LOADER_DISK}1/${BRP_CUSTOM_RD_NAME}"
+brp_cp_flat "${BRP_TMP_GRUB_CONF}" "/tmp/grub.cfg"
+
 pr_process_ok
 
 ##### CLEANUP ##########################################################################################################
 pr_process "Cleaning up"
-brp_detach_image "${BRP_OUTPUT_FILE}"
+#brp_detach_image "${BRP_OUTPUT_FILE}"
 if [ "${BRP_KEEP_BUILD}" -eq 0 ]; then
   "${RM_PATH}" -rf "${BRP_BUILD_DIR}"
 fi
