@@ -525,6 +525,9 @@ brp_cp_flat "${BRP_TMP_GRUB_CONF}" "${BRP_OUT_P1}/boot/grub/grub.cfg"
 fi
 
 # Add patched zImage, patched ramdisk and our GRUB config for new mshell (dont make loader.img 2023.10.26)
+readonly BRP_ZLINMOD_NAME="zImage" # name of the linux kernel in the final image
+readonly BRP_RDMOD_NAME="rd.gz" # name of the ramdisk in the final image
+
 pr_dbg "Copying patched files"
 brp_cp_flat "${BRP_ZLINUX_PATCHED_FILE}" "/mnt/${BRP_LOADER_DISK}1/${BRP_ZLINMOD_NAME}"
 brp_cp_flat "${BRP_RD_REPACK}" "/mnt/${BRP_LOADER_DISK}3/${BRP_RDMOD_NAME}"
