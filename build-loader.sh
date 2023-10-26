@@ -251,6 +251,8 @@ fi
 # Prepare Linux kernel image
 readonly BRP_ZLINUX_FILE=${BRP_UPAT_DIR}/$(brp_json_get_field "${BRP_REL_CONFIG_JSON}" 'files.zlinux.name')
 readonly BRP_ZLINUX_PATCHED_FILE="${BRP_BUILD_DIR}/zImage-patched"
+#block
+if [ 1 = 0 ]; then
 if [ ! -f "${BRP_ZLINUX_PATCHED_FILE}" ]; then
   # Using repack method to patch the kernel. This method assumes that it will be interrupted, someone will go and look
   # at the unpacked file, patch it manually and re-run the process to continue packing
@@ -286,7 +288,9 @@ if [ ! -f "${BRP_ZLINUX_PATCHED_FILE}" ]; then
 else
   pr_info "Found patched zImage at \"%s\" - skipping patching & repacking" "${BRP_ZLINUX_PATCHED_FILE}"
 fi
+fi
 # Add ARPL's vmlinux kernel patch 2023.10.26
+pr_info "Found patched zImage at \"%s\" - skipping patching & repacking" "${BRP_ZLINUX_PATCHED_FILE}"
 chmod -R a+x $PWD/buildroot/board/syno/rootfs-overlay/root
 $PWD/buildroot/board/syno/rootfs-overlay/root/bzImage-to-vmlinux.sh "${BRP_ZLINUX_FILE}" "${BRP_CACHE_DIR}/vmlinux"
 $PWD/buildroot/board/syno/rootfs-overlay/root/kpatch "${BRP_CACHE_DIR}/vmlinux" "${BRP_CACHE_DIR}/vmlinux-mod"
