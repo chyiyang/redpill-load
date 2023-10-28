@@ -80,6 +80,7 @@ jobs:
           sha256sum pat/rd.gz >> checksum.sha256
           sha256sum vmlinux >> checksum.sha256
           cat checksum.sha256
+          if [ 1 = 0 ]; then
           # patch vmlinux
           # vmlinux_mod.bin
           #curl -L https://github.com/jumkey/dsm-research/raw/master/tools/common.php -o common.php
@@ -108,10 +109,12 @@ jobs:
 
           # ----------
           bsdiff pat/zImage zImage_mod diff.bsp
+          fi
+          
           echo '---copy file---'
           #cp vmlinux /opt/dist
           #cp vmlinux_mod.bin /opt/dist
-          cp diff.bsp /opt/dist
+          #cp diff.bsp /opt/dist
           cp checksum.sha256 /opt/dist
           echo '---END---'
       - name: Upload
