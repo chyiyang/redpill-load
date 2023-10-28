@@ -1,12 +1,9 @@
+# example ${1} = "7.2.0", ${2} = "64570", ${3} = "7.2.1", ${4} = "69057"
 
-for file in `cat models`
+for m in `cat models.72`
 do 
-echo "Working on $file"
-cp -rp $file/7.2.0-64570 $file/7.2.1-69057
-rm -f $file/7.2.1-69057/*.bsp
-sed -i 's/64570/69057/g' $file/7.2.1-69057/config.json
-#sed -i 's/7.2.0/7.2.0/g' $file/7.2.0-64561/config.json
-#sed -i 's/redpill-linux-v4.4.180+.ko/redpill-linux-v4.4.302+.ko/g' $file/7.2.0-64561/config.json
-
+echo "Working on $m"
+cp -rp $m/${1}-${2} $m/${3}-${4}
+sed -i "s/${1}/${2}/g" $m/${3}-${4}/config.json
+sed -i "s/${3}/${4}/g" $m/${3}-${4}/config.json
 done
-
