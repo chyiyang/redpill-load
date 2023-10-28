@@ -29,8 +29,8 @@ jobs:
           mkdir /opt/build
           mkdir /opt/dist
           cd /opt/build
-          curl -kL ${{github.event.inputs.toolchain}} -o toolchain.txz
-          curl -kL ${{github.event.inputs.linux-src}} -o linux.tar.xz
+          #curl -kL ${{github.event.inputs.toolchain}} -o toolchain.txz
+          #curl -kL ${{github.event.inputs.linux-src}} -o linux.tar.xz
 
           # download old pat for syno_extract_system_patch # thanks for jumkey's idea.
           curl -kL https://global.download.synology.com/download/DSM/release/7.0.1/42218/DSM_DS3622xs%2B_42218.pat --output oldpat.tar.gz
@@ -71,14 +71,20 @@ jobs:
             tar xf data.tar.xz
             cd ..
           fi
+          
+          # remark patch vmlinux from 2023.10.28 start
+          if [ 1 = 0 ]; then
           echo "test5"
           [ ! -d toolchain ] && mkdir toolchain
           tar xf toolchain.txz -C toolchain
           [ ! -d linux-src ] && mkdir linux-src
           tar xf linux.tar.xz --strip-components 1 -C linux-src
-
           # extract vmlinux
           ./linux-src/scripts/extract-vmlinux pat/zImage > vmlinux
+          
+          # remark patch vmlinux from 2023.10.28 end
+          fi
+          
           # sha256
           sha256sum /opt/build/ds.pat | awk '{print $1}' | awk '{print $1 "  '${file}' os.sha256"}' >> /opt/dist/files-chksum
           sha256sum /opt/build/pat/zImage | awk '{print $1}' | awk '{print $1 "  '${file}' files.zlinux.sha256"}' >> /opt/dist/files-chksum
@@ -91,6 +97,8 @@ jobs:
           md5sum /opt/build/ds.pat | awk '{print $1}' | awk '{print $1 "  '${file}' os.md5"}' >> /opt/dist/md5-chksum
           echo "" >> /opt/dist/md5-chksum
 
+          # remark patch vmlinux from 2023.10.28 start
+          if [ 1 = 0 ]; then
           # patch vmlinux
           # vmlinux_mod.bin
           # New fabio patching method 
@@ -150,13 +158,16 @@ jobs:
           cp -v /opt/build/pat/rd.gz  /opt/dist/rd.gz.${file}
           echo '---END---'
 
+          # remark patch vmlinux from 2023.10.28 end
+          fi
+
           ls -l
           echo 'Clean Directory!!!!!!!!!!!!!'
-          sudo find /opt/build/linux-src -delete
+          #sudo find /opt/build/linux-src -delete
           sudo find /opt/build/pat -delete
-          sudo find /opt/build/recreate-zImage -delete
+          #sudo find /opt/build/recreate-zImage -delete
           sudo find /opt/build/synoesp -delete
-          sudo find /opt/build/toolchain -delete
+          #sudo find /opt/build/toolchain -delete
           ls -l
           
           done
