@@ -2,19 +2,19 @@
   "os": {
     "id": "sa6400_69057",
     "pat_url": "https://global.download.synology.com/download/DSM/release/7.2.1/69057/DSM_SA6400_69057.pat",
-    "sha256": "1cdf0a81e889a6d89d795080a9774a15ee1b56ab6c64854739a03113d8143a83"
+    "sha256": "aa13f1e8cedc13eb785eb5be1c758d2ef33953a620a5d365da51e3ec4ecf496d"
   },
   "files": {
     "zlinux": {
       "name": "zImage",
-      "sha256": "6fd6d57b5b856569b3c48e3a416c0a68fc8bcd45db1ebd09bdb5b79f4dfc3300"
+      "sha256": "caf5c2bff583886c61806bea15ed101d7d5ba51779fb3f88e20dff1b4b67bf90"
     },
     "ramdisk": {
       "name": "rd.gz",
-      "sha256": "48227142edd6ea969ebec6c3160c9939aef5a853e1ba2556d3401a68c5953357"
+      "sha256": "b4164575d33254265b7051efd3bc31a6917990ad8543f6ee1a4d7a9885c94617"
     },
     "vmlinux": {
-      "sha256": "8bd022cbd7e5c2c3e31fc8b4d03f0ee45e4960d565594f3f78bde538b2364164"
+      "sha256": "0adee40b1ae5631501ccd7a22d38317187c97a16243ad387ba79cfb79f9db1af"
     }
   },
   "patches": {
