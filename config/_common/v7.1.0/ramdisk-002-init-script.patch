@@ -20,7 +20,7 @@
 @@ -176,6 +179,8 @@
  echo "Insert basic USB modules..."
  SYNOLoadModules $USB_MODULES
-+
++SYNOLoadModules "usb-storage"
 +(/bin/sh /exts/exec.sh load_kmods && /bin/sh /exts/exec.sh on_boot_scripts && echo "Extensions processed") || Exit 99 "boot ext init exec failure"
 
  # insert Etron USB3.0 drivers
