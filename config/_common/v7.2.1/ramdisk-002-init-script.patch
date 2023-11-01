@@ -14,9 +14,9 @@
  	date
  
 +	(/bin/sh /exts/exec.sh load_kmods && /bin/sh /exts/exec.sh on_jrExit_scripts && echo "Extensions processed") || Exit 99 "jrExit ext init exec failure"
- 	UmountRoot
- 
- 	exit $1
+ 	if [ "$1" -eq 0 ]; then
+ 		TryRestoringDeviceBackToSwapRaid
+ 	fi
 @@ -176,6 +179,8 @@
  echo "Insert basic USB modules..."
  SYNOLoadModules $USB_MODULES
@@ -33,4 +33,4 @@
 +(/bin/sh /exts/exec.sh load_kmods && /bin/sh /exts/exec.sh on_patches_scripts && echo "Extensions processed") || Exit 99 "patches ext init exec failure"
  LoadBrmModules
  
- ####################################################
+ if [ "$KERNEL_VCODE" -ge "$(KernelVersionCode "5.10")" ]; then
