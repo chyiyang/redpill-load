@@ -56,7 +56,9 @@ BRP_OUTPUT_FILE="${3:-"$PWD/images/redpill-${BRP_HW_PLATFORM}_${BRP_SW_VERSION}_
 BRP_ORG_PLATFORM="$4"
 BRP_KVER="$5"
 
-platkver="$(echo ${BRP_ORG_PLATFORM}_${BRP_KVER} | sed 's/\.//g')"
+BPR_LOWER_PLATFORM=$(echo ${BRP_ORG_PLATFORM} | tr '[:upper:]' '[:lower:]')
+
+platkver="$(echo ${BPR_LOWER_PLATFORM}_${BRP_KVER} | sed 's/\.//g')"
 echo "platkver = ${platkver}"
 
 BRP_REL_CONFIG_BASE="$PWD/config/${BRP_HW_PLATFORM}/${BRP_SW_VERSION}"
