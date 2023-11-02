@@ -46,7 +46,7 @@ BRP_DEV_DISABLE_EXTS=${BRP_DEV_DISABLE_EXTS:-0} # when set 1 all extensions will
 ##### CONFIGURATION VALIDATION##########################################################################################
 
 ### Command line params handling
-if [ $# -lt 3 ] || [ $# -gt 4 ]; then
+if [ $# -lt 4 ] || [ $# -gt 5 ]; then
   echo "Usage: $0 platform version <output-file>"
   exit 1
 fi
