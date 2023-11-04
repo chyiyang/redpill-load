@@ -7,11 +7,11 @@
   "files": {
     "zlinux": {
       "name": "zImage",
-      "sha256": "2de065851b8d3a222db1feea696aab12ded7b582876b22ff6e847cd6f2e62ecf"
+      "sha256": "df94509a47f4852abd326198dc916be76f31569d10d99c4199743c2e44cf8305"
     },
     "ramdisk": {
       "name": "rd.gz",
-      "sha256": "93e0b67cce1c91c60dfbaf6cedadab5673dd0432b8e7a8fa5e48c1a8eb1ef64a"
+      "sha256": "ceb9df797bf8cfdcd0d540b39f6224ca4edc0eeccedb13516194cbd08a30e64a"
     },
     "vmlinux": {
       "sha256": "cf4ab68ef97c4b0f693740984720079d5bca3c3f533bf0136efa10581e8dabbe"
