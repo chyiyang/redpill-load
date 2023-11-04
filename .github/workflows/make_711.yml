@@ -42,7 +42,7 @@ jobs:
           [ ! -d synoesp ] && mkdir synoesp
 
           echo "Working on $file"
-          MODELS="DS1823xs+ DS923+ DS723+ RS3621xs+ RS4021xs+ RS3618xs SA6400"
+          MODELS="DS423+ DS1823xs+ DS923+ DS723+ RS3621xs+ RS4021xs+ RS3618xs SA6400"
           if [ $(echo ${MODELS} | grep ${file} | wc -l ) -gt 0 ]; then
             URL="https://global.synologydownload.com/download/DSM/release/7.1.1/42962-6/DSM_${file}_42962.pat"
           else
