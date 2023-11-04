@@ -32,14 +32,11 @@ jobs:
           #curl -kL ${{github.event.inputs.toolchain}} -o toolchain.txz
           #curl -kL ${{github.event.inputs.linux-src}} -o linux.tar.xz
 
-          # download old pat for syno_extract_system_patch # thanks for jumkey's idea.
-          curl -kL https://global.download.synology.com/download/DSM/release/7.0.1/42218/DSM_DS3622xs%2B_42218.pat --output oldpat.tar.gz
-
           curl -kLO https://github.com/PeterSuh-Q3/redpill-load/raw/master/config/models.701
           for file in `cat models.701`
           do
           cd /opt/build
-          [ ! -d synoesp ] && mkdir synoesp
+          #[ ! -d synoesp ] && mkdir synoesp
 
           echo "Working on $file"
           URL="https://global.synologydownload.com/download/DSM/release/7.0.1/42218/DSM_${file}_42218.pat"
@@ -47,22 +44,10 @@ jobs:
           echo ${URL}          
 
           curl -kL ${URL} -o ds.pat
-          #patfile=$(basename ${URL} | while read; do echo -e ${REPLY//%/\\x}; done)
-          #echo "::set-output name=patfile::$patfile"
 
-          tar -C./synoesp/ -xf oldpat.tar.gz rd.gz
-          cd synoesp
-          xz -dc < rd.gz >rd 2>/dev/null || echo "extract rd.gz"
-          echo "finish"
-          cpio -idm <rd 2>&1 || echo "extract rd"
-          [ ! -d extract ] && mkdir extract && cd extract
-          cp ../usr/lib/libcurl.so.4 ../usr/lib/libmbedcrypto.so.5 ../usr/lib/libmbedtls.so.13 ../usr/lib/libmbedx509.so.1 ../usr/lib/libmsgpackc.so.2 ../usr/lib/libsodium.so ../usr/lib/libsynocodesign-ng-virtual-junior-wins.so.7 ../usr/syno/bin/scemd ./
-          ln -s scemd syno_extract_system_patch
-          cd ../..
           [ ! -d pat ] && mkdir pat
-          #tar xf ds.pat -C pat
+          tar xf ds.pat -C pat
           ls -lh ./
-          sudo LD_LIBRARY_PATH=synoesp/extract synoesp/extract/syno_extract_system_patch ds.pat pat || echo "extract latest pat"
           echo "test4"
           # is update_pack
           if [ ! -f "pat/zImage" ]; then
