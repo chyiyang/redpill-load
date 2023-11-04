@@ -11,7 +11,7 @@
     },
     "ramdisk": {
       "name": "rd.gz",
-      "sha256": "e0cd32f58dfa9ecb3f4ef2f34f16beb702c68ac5bf786f56301c77894bdc3565"
+      "sha256": "67f6f3ba6284c0a71462071f51b2fdb52c315eff5e5b4e12bd204509b54ff93f"
     },
     "vmlinux": {
       "sha256": "31a7a9e97187352d513c6d6d5a50e749f017590d1e27b0ef93b8376f0e98b683"
