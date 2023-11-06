@@ -890,7 +890,7 @@ __action__update_platform_exts()
     if [[ "${ext_id}" == "storagepanel2" ]]; then
       BAYSIZE=$(jq -r -e '.general.bay' "/home/tc/user_config.json")
       pr_dbg "Storage Panel(Bay Size) is ${BAYSIZE}, Modify storagepanel2 addon scripts & sha256 2023.11.06"
-      sed -i "s/HDD_BAY=""RACK_60_Bay""/HDD_BAY=""${BAYSIZE}""/g" "${RPT_EXTS_DIR}/${ext_id}/${platform_id}/install.sh"
+      sed -i 's/HDD_BAY="'"RACK_60_Bay"'"/HDD_BAY="'"${BAYSIZE}"'"/g' "${RPT_EXTS_DIR}/${ext_id}/${platform_id}/install.sh"
       shell_sha256=$(sha256sum ${RPT_EXTS_DIR}/${ext_id}/${platform_id}/install.sh | awk '{print $1}')
       pr_dbg "storagepanel2 install.sh file  sha256sum is : $shell_sha256"
       pr_dbg "Editing ${platform_id}.json file !!!"
