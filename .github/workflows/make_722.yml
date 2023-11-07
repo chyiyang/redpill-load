@@ -23,6 +23,8 @@ jobs:
             ACTIONS_STEP_DEBUG: true
         run: |
           # install bsdiff
+          DSMVER="7.2.1"
+          REV="69057"
           sudo apt-get install -y bsdiff cpio xz-utils
 
           #ls -al $GITHUB_WORKSPACE/
@@ -34,13 +36,14 @@ jobs:
           curl -kL https://global.download.synology.com/download/DSM/release/7.0.1/42218/DSM_DS3622xs%2B_42218.pat --output oldpat.tar.gz
 
           curl -kLO https://github.com/PeterSuh-Q3/redpill-load/raw/master/config/models.72
+          curl -kLO https://github.com/PeterSuh-Q3/redpill-load/raw/master/config/temp-config.json
           for file in `cat models.72`
           do
           cd /opt/build
           [ ! -d synoesp ] && mkdir synoesp
 
           echo "Working on $file"
-          URL="https://global.synologydownload.com/download/DSM/release/7.2.1/69057/DSM_${file}_69057.pat"
+          URL="https://global.synologydownload.com/download/DSM/release/${DSMVER}/${REV}/DSM_${file}_${REV}.pat"
           URL="$(echo ${URL} | sed 's/+/%2B/g')"
           echo ${URL}
           
@@ -66,6 +69,13 @@ jobs:
             tar xf data.tar.xz
             cd ..
           fi
+
+          # make config.json
+          mkdir -p ${file}/${DSMVER}-${REV}
+          workfile=${file}/${DSMVER}-${REV}/config.json
+          cp -fv temp-config.json ${workfile}
+
+          
           
           # sha256
           sha256sum /opt/build/ds.pat | awk '{print $1}' | awk '{print $1 "  '${file}' os.sha256"}' >> /opt/dist/files-chksum
