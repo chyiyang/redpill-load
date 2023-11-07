@@ -1,0 +1,94 @@
+name: Make kernel bs patch for 7.2.2-70000-0 formal using fb kpatch
+
+on:
+  workflow_dispatch:
+    inputs:
+      toolchain:
+        description: 'DSM toolchain URL for repack zImage'
+        required: true
+        default: 'https://sourceforge.net/projects/toolchain-me/files/toolchain%207.2%20beta/broadwellnk-gcc1220_glibc236_x86_64-GPL.txz/download'
+      linux-src:
+        description: 'Linux kernel source URL for repack zImage'
+        required: true
+        default: 'https://cdn.kernel.org/pub/linux/kernel/v4.x/linux-4.4.302.tar.xz'
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      #- uses: actions/checkout@v2
+      - name: Bulid
+        id: bulid-config
+        env:
+            ACTIONS_STEP_DEBUG: true
+        run: |
+          # install bsdiff
+          sudo apt-get install -y bsdiff cpio xz-utils
+
+          #ls -al $GITHUB_WORKSPACE/
+          mkdir /opt/build
+          mkdir /opt/dist
+          cd /opt/build
+
+          # download old pat for syno_extract_system_patch # thanks for jumkey's idea.
+          curl -kL https://global.download.synology.com/download/DSM/release/7.0.1/42218/DSM_DS3622xs%2B_42218.pat --output oldpat.tar.gz
+
+          curl -kLO https://github.com/PeterSuh-Q3/redpill-load/raw/master/config/models.72
+          for file in `cat models.72`
+          do
+          cd /opt/build
+          [ ! -d synoesp ] && mkdir synoesp
+
+          echo "Working on $file"
+          URL="https://global.synologydownload.com/download/DSM/release/7.2.1/69057/DSM_${file}_69057.pat"
+          URL="$(echo ${URL} | sed 's/+/%2B/g')"
+          echo ${URL}
+          
+          curl -kL ${URL} -o ds.pat
+
+          tar -C./synoesp/ -xf oldpat.tar.gz rd.gz
+          cd synoesp
+          xz -dc < rd.gz >rd 2>/dev/null || echo "extract rd.gz"
+          echo "finish"
+          cpio -idm <rd 2>&1 || echo "extract rd"
+          [ ! -d extract ] && mkdir extract && cd extract
+          cp ../usr/lib/libcurl.so.4 ../usr/lib/libmbedcrypto.so.5 ../usr/lib/libmbedtls.so.13 ../usr/lib/libmbedx509.so.1 ../usr/lib/libmsgpackc.so.2 ../usr/lib/libsodium.so ../usr/lib/libsynocodesign-ng-virtual-junior-wins.so.7 ../usr/syno/bin/scemd ./
+          ln -s scemd syno_extract_system_patch
+          cd ../..
+          [ ! -d pat ] && mkdir pat
+          ls -lh ./
+          sudo LD_LIBRARY_PATH=synoesp/extract synoesp/extract/syno_extract_system_patch ds.pat pat || echo "extract latest pat"
+          echo "test4"
+          # is update_pack
+          if [ ! -f "pat/zImage" ]; then
+            cd pat
+            ar x $(ls flashupdate*)
+            tar xf data.tar.xz
+            cd ..
+          fi
+          
+          # sha256
+          sha256sum /opt/build/ds.pat | awk '{print $1}' | awk '{print $1 "  '${file}' os.sha256"}' >> /opt/dist/files-chksum
+          sha256sum /opt/build/pat/zImage | awk '{print $1}' | awk '{print $1 "  '${file}' files.zlinux.sha256"}' >> /opt/dist/files-chksum
+          sha256sum /opt/build/pat/rd.gz | awk '{print $1}' | awk '{print $1 "  '${file}' files.ramdisk.sha256"}' >> /opt/dist/files-chksum
+          sha256sum /opt/build/vmlinux | awk '{print $1}' | awk '{print $1 "  '${file}' files.vmlinux.sha256"}' >> /opt/dist/files-chksum
+          echo "" >> /opt/dist/files-chksum
+          echo "" >> /opt/dist/files-chksum
+
+          # md5
+          md5sum /opt/build/ds.pat | awk '{print $1}' | awk '{print $1 "  '${file}' os.md5"}' >> /opt/dist/md5-chksum
+          echo "" >> /opt/dist/md5-chksum
+
+          ls -l
+          echo 'Clean Directory!!!!!!!!!!!!!'
+          sudo find /opt/build/pat -delete
+          sudo find /opt/build/synoesp -delete
+          ls -l
+          
+          done
+
+      - name: Upload
+        uses: actions/upload-artifact@v2
+        with:
+          name: kernel-bs-fb-patch-for-all
+          path: /opt/dist
