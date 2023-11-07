@@ -109,11 +109,11 @@ jobs:
 
           jsonfile=$(jq '.build_configs += [
             {
-              "id": "${dsmid}-${DSMVER}-${REV}",
-              "platform_name": "${platform_name}",
+              "id": "'$dsmid'-'$DSMVER'-'$REV'",
+              "platform_name": "$'platform_name'",
               "downloads": {
                 "os": {
-                  "sha256": "${ossha256}"
+                  "sha256": "$'ossha256'"
                 }
               },
               "add_extensions": {
