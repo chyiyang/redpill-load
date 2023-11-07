@@ -73,7 +73,7 @@ jobs:
           fi
 
           . /opt/build/pat/VERSION
-          unique="synology_broadwellnk_3622xs+"
+          #unique="synology_broadwellnk_3622xs+"
           platform_name=$(echo "$unique" | awk -F "_" '{print $2}')
           echo $platform_name
 
