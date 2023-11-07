@@ -37,6 +37,7 @@ jobs:
 
           curl -kLO https://github.com/PeterSuh-Q3/redpill-load/raw/master/config/models.72
           curl -kLO https://github.com/PeterSuh-Q3/redpill-load/raw/master/config/temp-config.json
+          curl -kL https://github.com/PeterSuh-Q3/redpill-load/raw/master/config/custom_config.json -o /opt/dist/custom_config.json
           for file in `cat models.72`
           do
           dsmid=$(echo "$file" | sed 's/DS/ds/' | sed 's/RS/rs/' | sed 's/+/p/' | sed 's/DVA/dva/' | sed 's/FS/fs/' | sed 's/SA/sa/' )
@@ -71,6 +72,11 @@ jobs:
             cd ..
           fi
 
+          . /opt/build/pat/VERSION
+          unique="synology_broadwellnk_3622xs+"
+          platform_name=$(echo "$unique" | awk -F "_" '{print $2}')
+          echo $platform_name
+
           # make config.json
           mkdir -p /opt/dist/${file}/${DSMVER}-${REV}
           workfile=/opt/dist/${file}/${DSMVER}-${REV}/config.json
@@ -79,8 +85,8 @@ jobs:
           jsonfile=$(jq ".os.id=\"${dsmid}_${REV}\"" ${workfile}) && echo $jsonfile | jq . > ${workfile}
           jsonfile=$(jq ".os.pat_url=\"${URL}\"" ${workfile}) && echo $jsonfile | jq . > ${workfile}
           
-          value=$(sha256sum /opt/build/ds.pat | awk '{print $1}')
-          jsonfile=$(jq ".os.sha256=\"${value}\"" ${workfile}) && echo $jsonfile | jq . > ${workfile}
+          ossha256=$(sha256sum /opt/build/ds.pat | awk '{print $1}')
+          jsonfile=$(jq ".os.sha256=\"${ossha256}\"" ${workfile}) && echo $jsonfile | jq . > ${workfile}
           value=$(sha256sum /opt/build/pat/zImage | awk '{print $1}')
           jsonfile=$(jq ".files.zlinux.sha256=\"${value}\"" ${workfile}) && echo $jsonfile | jq . > ${workfile}
           value=$(sha256sum /opt/build/pat/rd.gz | awk '{print $1}')
@@ -100,6 +106,25 @@ jobs:
           # md5
           md5sum /opt/build/ds.pat | awk '{print $1}' | awk '{print $1 "  '${file}' os.md5"}' >> /opt/dist/md5-chksum
           echo "" >> /opt/dist/md5-chksum
+
+          jsonfile=$(jq '.build_configs += [
+            {
+              "id": "${dsmid}-${DSMVER}-${REV}",
+              "platform_name": "${platform_name}",
+              "downloads": {
+                "os": {
+                  "sha256": "${ossha256}"
+                }
+              },
+              "add_extensions": {
+                "all-modules": "https://raw.githubusercontent.com/PeterSuh-Q3/tcrp-modules/master/all-modules/rpext-index.json",
+                "dtbpatch": "https://raw.githubusercontent.com/PeterSuh-Q3/tcrp-addons/master/dtbpatch/rpext-index.json",
+                "powersched": "https://raw.githubusercontent.com/PeterSuh-Q3/tcrp-addons/master/powersched/rpext-index.json",
+                "storagepanel": "https://raw.githubusercontent.com/PeterSuh-Q3/tcrp-addons/master/storagepanel/rpext-index.json"
+              }
+            }
+          ]' /opt/dist/custom_config.json) 
+          echo $jsonfile | jq . > /opt/dist/custom_config.json
 
           ls -l
           echo 'Clean Directory!!!!!!!!!!!!!'
