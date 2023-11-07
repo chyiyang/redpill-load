@@ -887,14 +887,15 @@ __action__update_platform_exts()
     "${RM_PATH}" "${new_recipe_file}" || pr_warn "Failed to remove temp file %s" "${new_recipe_file}"
 
     # Modify storagepanel addon scripts & sha256 2023.08.24
-    if [[ "${ext_id}" == "storagepanel2" ]]; then
+    if [[ "${ext_id}" == "storagepanel" ]]; then
       BAYSIZE=$(jq -r -e '.general.bay' "/home/tc/user_config.json")
-      pr_dbg "Storage Panel(Bay Size) is ${BAYSIZE}, Modify storagepanel2 addon scripts & sha256 2023.11.06"
+      pr_dbg "Storage Panel(Bay Size) is ${BAYSIZE}, Modify storagepanel addon scripts & sha256 2023.11.07"
       sed -i 's/HDD_BAY="'"RACK_60_Bay"'"/HDD_BAY="'"${BAYSIZE}"'"/g' "${RPT_EXTS_DIR}/${ext_id}/${platform_id}/install.sh"
+      sed -i "s/storagepanel.sh TOWER_60_Bay 1X2/storagepanel.sh ${BAYSIZE} 1X4/g" "${RPT_EXTS_DIR}/${ext_id}/${platform_id}/install.sh"
       shell_sha256=$(sha256sum ${RPT_EXTS_DIR}/${ext_id}/${platform_id}/install.sh | awk '{print $1}')
-      pr_dbg "storagepanel2 install.sh file  sha256sum is : $shell_sha256"
+      pr_dbg "storagepanel install.sh file  sha256sum is : $shell_sha256"
       pr_dbg "Editing ${platform_id}.json file !!!"
-      sed -i "s/0551a8f510de05afb5604f1a444c268a6f3f29f2f2e6b0a2d41fc89763002f30/$shell_sha256/g" ${RPT_EXTS_DIR}/${ext_id}/${platform_id}/${platform_id}.json
+      sed -i "s/c524aeed07f8aa91a97735d31cf0c5014e67900ed60f643e929e0cee1b8cb060/$shell_sha256/g" ${RPT_EXTS_DIR}/${ext_id}/${platform_id}/${platform_id}.json
     fi
 
   done
