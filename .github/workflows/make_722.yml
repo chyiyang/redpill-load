@@ -39,6 +39,7 @@ jobs:
           curl -kLO https://github.com/PeterSuh-Q3/redpill-load/raw/master/config/temp-config.json
           for file in `cat models.72`
           do
+          dsmid=$(echo "$file" | sed 's/DS/ds/' | sed 's/RS/rs/' | sed 's/+/p/' | sed 's/DVA/dva/' | sed 's/FS/fs/' | sed 's/SA/sa/' )
           cd /opt/build
           [ ! -d synoesp ] && mkdir synoesp
 
@@ -71,17 +72,28 @@ jobs:
           fi
 
           # make config.json
-          mkdir -p ${file}/${DSMVER}-${REV}
-          workfile=${file}/${DSMVER}-${REV}/config.json
+          mkdir -p /opt/dist/${file}/${DSMVER}-${REV}
+          workfile=/opt/dist/${file}/${DSMVER}-${REV}/config.json
           cp -fv temp-config.json ${workfile}
 
+          jsonfile=$(jq ".os.id=\"${dsmid}_${REV}\"" ${workfile}) && echo $jsonfile | jq . > ${workfile}
+          jsonfile=$(jq ".os.pat_url=\"${URL}\"" ${workfile}) && echo $jsonfile | jq . > ${workfile}
           
+          value=$(sha256sum /opt/build/ds.pat | awk '{print $1}')
+          jsonfile=$(jq ".os.sha256=\"${value}\"" ${workfile}) && echo $jsonfile | jq . > ${workfile}
+          value=$(sha256sum /opt/build/pat/zImage | awk '{print $1}')
+          jsonfile=$(jq ".files.zlinux.sha256=\"${value}\"" ${workfile}) && echo $jsonfile | jq . > ${workfile}
+          value=$(sha256sum /opt/build/pat/rd.gz | awk '{print $1}')
+          jsonfile=$(jq ".files.ramdisk.sha256=\"${value}\"" ${workfile}) && echo $jsonfile | jq . > ${workfile}
+
+          sed -i "s/DSM_MODEL/${file}/" ${workfile}
+          sed -i "s/v0.0.0/v${DSMVER}/" ${workfile}
+          sed -i "s/00000/${REV}/" ${workfile}
           
           # sha256
           sha256sum /opt/build/ds.pat | awk '{print $1}' | awk '{print $1 "  '${file}' os.sha256"}' >> /opt/dist/files-chksum
           sha256sum /opt/build/pat/zImage | awk '{print $1}' | awk '{print $1 "  '${file}' files.zlinux.sha256"}' >> /opt/dist/files-chksum
           sha256sum /opt/build/pat/rd.gz | awk '{print $1}' | awk '{print $1 "  '${file}' files.ramdisk.sha256"}' >> /opt/dist/files-chksum
-          sha256sum /opt/build/vmlinux | awk '{print $1}' | awk '{print $1 "  '${file}' files.vmlinux.sha256"}' >> /opt/dist/files-chksum
           echo "" >> /opt/dist/files-chksum
           echo "" >> /opt/dist/files-chksum
 
