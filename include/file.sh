@@ -291,25 +291,27 @@ brp_cp_from_list()
 # Args: $1 URL to download from | $2 destination file | $3 hard fail on error [1 to do so]
 rpt_download_remote()
 {
-#    pr_info "Downloading remote file %s to %s" "${1}" "${2}"
-#    local out;
-#    out=$("${CURL_PATH}" -k -n -s --location --fail --progress-bar --retry 5 --output "${2}" "${1}")
-#    if [ $? -ne 0 ]; then
-#      if [[ "${3}" -eq 1 ]]; then
-#        pr_crit "Failed to download %s to %s\n\n%s" "${1}" "${2}" "${out}"
-#      else
-#        return 1
-#      fi
-#    fi
-
-    fromfile=$(echo "${1}" | sed 's#https://raw.githubusercontent.com/PeterSuh-Q3#/dev/shm#' | sed 's#/master##' | sed 's#/main##')
-    pr_info "Copy downloaded file %s to %s" "${fromfile}" "${2}"
-    cp -f "${fromfile}" "${2}"
-    if [ $? -ne 0 ]; then
-      if [[ "${3}" -eq 1 ]]; then
-        pr_crit "Failed to copy %s to %s\n" "${fromfile}" "${2}"
-      else
-        return 1
+    if [ $(echo "${1}" | grep tcrp-addons | wc -l) -gt 0 ]; then
+      fromfile=$(echo "${1}" | sed 's#https://raw.githubusercontent.com/PeterSuh-Q3#/dev/shm#' | sed 's#/master##' | sed 's#/main##')
+      pr_info "Copy downloaded file %s to %s" "${fromfile}" "${2}"
+      cp -f "${fromfile}" "${2}"
+      if [ $? -ne 0 ]; then
+        if [[ "${3}" -eq 1 ]]; then
+          pr_crit "Failed to copy %s to %s\n" "${fromfile}" "${2}"
+        else
+          return 1
+        fi
+      fi
+    else
+      pr_info "Downloading remote file %s to %s" "${1}" "${2}"
+      local out;
+      out=$("${CURL_PATH}" --location --fail --progress-bar --retry 5 --output "${2}" "${1}")
+      if [ $? -ne 0 ]; then
+        if [[ "${3}" -eq 1 ]]; then
+          pr_crit "Failed to download %s to %s\n\n%s" "${1}" "${2}" "${out}"
+        else
+          return 1
+        fi
       fi
     fi
 }
