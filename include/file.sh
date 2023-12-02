@@ -291,7 +291,18 @@ brp_cp_from_list()
 # Args: $1 URL to download from | $2 destination file | $3 hard fail on error [1 to do so]
 rpt_download_remote()
 {
-    if [ -d /dev/shm/tcrp-addons/ ]||[ -d /dev/shm/tcrp-modules/ ]; then
+    if [ -d /dev/shm/tcrp-addons/ ]; then
+      fromfile=$(echo "${1}" | sed 's#https://raw.githubusercontent.com/PeterSuh-Q3#/dev/shm#' | sed 's#/master##' | sed 's#/main##')
+      pr_info "Copy downloaded file %s to %s" "${fromfile}" "${2}"
+      cp -f "${fromfile}" "${2}"
+      if [ $? -ne 0 ]; then
+        if [[ "${3}" -eq 1 ]]; then
+          pr_crit "Failed to copy %s to %s\n" "${fromfile}" "${2}"
+        else
+          return 1
+        fi
+      fi
+    elif [ -d /dev/shm/tcrp-modules/ ]; then
       fromfile=$(echo "${1}" | sed 's#https://raw.githubusercontent.com/PeterSuh-Q3#/dev/shm#' | sed 's#/master##' | sed 's#/main##')
       pr_info "Copy downloaded file %s to %s" "${fromfile}" "${2}"
       cp -f "${fromfile}" "${2}"
