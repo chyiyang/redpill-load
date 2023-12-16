@@ -498,10 +498,10 @@ brp_generate_grub_conf "${BRP_REL_CONFIG_JSON}" "${BRP_USER_CFG}" BRP_RELEASE_PA
 pr_process_ok
 
 ##### CREATE FINAL LOADER IMAGE ########################################################################################
-pr_process "Creating loader image at %s" "${BRP_OUTPUT_FILE}"
-brp_unpack_single_gz "${BRP_BOOT_IMAGE}" "${BRP_OUTPUT_FILE}"
-readonly BRP_OUT_P1="$(brp_mount_img_partitions "${BRP_OUTPUT_FILE}" 1 "${BRP_BUILD_DIR}/img-mnt")" # partition 1 of img
-readonly BRP_OUT_P2="$(brp_mount_img_partitions "${BRP_OUTPUT_FILE}" 2 "${BRP_BUILD_DIR}/img-mnt")" # partition 2 of img
+#pr_process "Creating loader image at %s" "${BRP_OUTPUT_FILE}"
+#brp_unpack_single_gz "${BRP_BOOT_IMAGE}" "${BRP_OUTPUT_FILE}"
+#readonly BRP_OUT_P1="$(brp_mount_img_partitions "${BRP_OUTPUT_FILE}" 1 "${BRP_BUILD_DIR}/img-mnt")" # partition 1 of img
+#readonly BRP_OUT_P2="$(brp_mount_img_partitions "${BRP_OUTPUT_FILE}" 2 "${BRP_BUILD_DIR}/img-mnt")" # partition 2 of img
 
 # Add patched zImage, patched ramdisk and our GRUB config for new mshell (dont make loader.img 2023.10.26)
 readonly BRP_OUT_P1="/mnt/${BRP_LOADER_DISK}1" 
@@ -536,7 +536,7 @@ pr_process_ok
 
 ##### CLEANUP ##########################################################################################################
 pr_process "Cleaning up"
-brp_detach_image "${BRP_OUTPUT_FILE}"
+#brp_detach_image "${BRP_OUTPUT_FILE}"
 if [ "${BRP_KEEP_BUILD}" -eq 0 ]; then
   "${RM_PATH}" -rf "${BRP_BUILD_DIR}"
 fi
