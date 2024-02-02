@@ -15,7 +15,6 @@ cd "${BASH_SOURCE%/*}/" || exit 1
 BRP_JUN_MOD=${BRP_JUN_MOD:-0} # whether you want to use jun's mod
 BRP_DEBUG=${BRP_DEBUG:-0} # whether you want to see debug messages
 BRP_CACHE_DIR=${BRP_CACHE_DIR:-"$PWD/cache"} # cache directory where stuff is downloaded & unpacked
-BRP_LOADER_DISK=$(blkid | grep "6234-C863" | cut -c 1-8 | awk -F\/ '{print $3}') # partition 3 of disk
 BRP_USER_CFG=${BRP_USER_CFG:-"$PWD/user_config.json"}
 BRP_BUILD_DIR=${BRP_BUILD_DIR:-''} # makes sure attempts are unique; do not override this unless you're using repack
 BRP_KEEP_BUILD=${BRP_KEEP_BUILD:-''} # will be set to 1 for repack method or 0 for direct
@@ -174,13 +173,13 @@ if [[ "${BRP_DEV_DISABLE_EXTS}" -ne 1 ]]; then
 
   if [[ -z "${RPT_BUILD_EXTS}" ]]; then
     pr_dbg "Updating & downloading all extensions for %s" "${BRP_REL_OS_ID}"
-    ( ./ext-manager.sh _update_platform_exts "${platkver}")
+    ( ./ext-manager.sh _update_platform_exts "${BRP_REL_OS_ID}")
     if [[ $? -ne 0 ]]; then
       pr_crit "Failed to update all extensions for %s platform - see errors above" "${BRP_REL_OS_ID}"
     fi
   else
     pr_dbg "Updating & downloading selected extensions (%s) for %s" "${RPT_BUILD_EXTS}" "${BRP_REL_OS_ID}"
-    ( ./ext-manager.sh _update_platform_exts "${platkver}" "${RPT_BUILD_EXTS}")
+    ( ./ext-manager.sh _update_platform_exts "${BRP_REL_OS_ID}" "${RPT_BUILD_EXTS}")
     if [[ $? -ne 0 ]]; then
       pr_crit "Failed to update extensions selected (%s) for %s platform - see errors above" \
               "${RPT_BUILD_EXTS}" "${BRP_REL_OS_ID}"
@@ -188,38 +187,6 @@ if [[ "${BRP_DEV_DISABLE_EXTS}" -ne 1 ]]; then
   fi
   pr_process_ok
 fi
-
-#def
-readonly BRP_REVISION=$(echo ${BRP_SW_VERSION} |cut -d"-" -f 2)
-#if [ ${BRP_REVISION} -gt 42217 ]; then
-if [ 1 = 0 ]; then
-
-##### DOWNLOAD LINUX KERNEL AND RAMDISK PREPARATION ####################################################################
-readonly BRP_ZIMAGE_FILE="${BRP_UPAT_DIR}/zImage"
-readonly BRP_ZIMAGE_URL="https://raw.githubusercontent.com/PeterSuh-Q3/ramdisk/main/${BRP_HW_PLATFORM}/${BRP_SW_VERSION}/zImage"
-readonly BRP_RD_FILE="${BRP_UPAT_DIR}/rd.gz"
-readonly BRP_RD_URL="https://raw.githubusercontent.com/PeterSuh-Q3/ramdisk/main/${BRP_HW_PLATFORM}/${BRP_SW_VERSION}/rd.gz"
-readonly BRP_MODEL="${BRP_HW_PLATFORM}"
-
-if [ ! -d "${BRP_UPAT_DIR}" ]; then
-  pr_dbg "PAT DIRECTORY %s not found - preparing" "${BRP_UPAT_DIR}"
-  brp_mkdir "${BRP_UPAT_DIR}"
-  touch "${BRP_UPAT_DIR}"/GRUB_VER
-  echo "MODEL=\"${BRP_MODEL}\"" >> "${BRP_UPAT_DIR}"/GRUB_VER
-  echo "PLATFORM=\"${BRP_ORG_PLATFORM}\""   >> "${BRP_UPAT_DIR}"/GRUB_VER
-  echo "GRUB_PROJECT=\"grub-2.x\""  >> "${BRP_UPAT_DIR}"/GRUB_VER 
-  echo "GRUB_VERSION=\"1\""         >> "${BRP_UPAT_DIR}"/GRUB_VER
-  echo "DSM_VERSION=\"${BRP_REVISION}\""  >> "${BRP_UPAT_DIR}"/GRUB_VER
-  
-  touch "${BRP_UPAT_DIR}"/grub_cksum.syno
-fi  
-pr_info "downloading zImage file %s from %s" "${BRP_ZIMAGE_FILE}" "${BRP_ZIMAGE_URL}"
-"${CURL_PATH}" --output "${BRP_ZIMAGE_FILE}" "${BRP_ZIMAGE_URL}"
-pr_info "downloading rd.gz file %s from %s" "${BRP_RD_FILE}" "${BRP_RD_URL}"
-"${CURL_PATH}" --output "${BRP_RD_FILE}" "${BRP_RD_URL}"
-
-#def
-else
 
 ##### SYSTEM IMAGE HANDLING ############################################################################################
 readonly BRP_PAT_FILE="${BRP_CACHE_DIR}/${BRP_REL_OS_ID}.pat"
@@ -243,15 +210,11 @@ else
   pr_info "Found unpacked PAT at \"%s\" - skipping unpacking" "${BRP_UPAT_DIR}"
 fi
 
-#def
-fi
 
 ##### LINUX KERNEL MODIFICATIONS #######################################################################################
 # Prepare Linux kernel image
 readonly BRP_ZLINUX_FILE=${BRP_UPAT_DIR}/$(brp_json_get_field "${BRP_REL_CONFIG_JSON}" 'files.zlinux.name')
 readonly BRP_ZLINUX_PATCHED_FILE="${BRP_BUILD_DIR}/zImage-patched"
-#block
-if [ 1 = 0 ]; then
 if [ ! -f "${BRP_ZLINUX_PATCHED_FILE}" ]; then
   # Using repack method to patch the kernel. This method assumes that it will be interrupted, someone will go and look
   # at the unpacked file, patch it manually and re-run the process to continue packing
@@ -287,14 +250,7 @@ if [ ! -f "${BRP_ZLINUX_PATCHED_FILE}" ]; then
 else
   pr_info "Found patched zImage at \"%s\" - skipping patching & repacking" "${BRP_ZLINUX_PATCHED_FILE}"
 fi
-fi
-# Add ARPL's vmlinux kernel patch 2023.10.26
-pr_info "Found patched zImage at \"%s\" - skipping patching & repacking" "${BRP_ZLINUX_PATCHED_FILE}"
-chmod -R a+x $PWD/buildroot/board/syno/rootfs-overlay/root
-$PWD/buildroot/board/syno/rootfs-overlay/root/bzImage-to-vmlinux.sh "${BRP_ZLINUX_FILE}" "${BRP_CACHE_DIR}/vmlinux"
-$PWD/buildroot/board/syno/rootfs-overlay/root/kpatch "${BRP_CACHE_DIR}/vmlinux" "${BRP_CACHE_DIR}/vmlinux-mod"
-$PWD/buildroot/board/syno/rootfs-overlay/root/vmlinux-to-bzImage.sh "${BRP_CACHE_DIR}/vmlinux-mod" "${BRP_ZLINUX_PATCHED_FILE}"
-rm -f "${BRP_CACHE_DIR}/vmlinux" "${BRP_CACHE_DIR}/vmlinux-mod"
+
 
 ##### RAMDISK MODIFICATIONS ############################################################################################
 # here we have a ready kernel in BRP_ZLINUX_PATCHED_FILE which makes the end of playing with the kernel
@@ -303,7 +259,6 @@ readonly BRP_RD_FILE=${BRP_UPAT_DIR}/$(brp_json_get_field "${BRP_REL_CONFIG_JSON
 readonly BRP_URD_DIR="${BRP_BUILD_DIR}/rd-${BRP_REL_OS_ID}-unpacked" # folder with unpacked ramdisk contents
 readonly BRP_RD_REPACK="${BRP_BUILD_DIR}/rd-patched-${BRP_REL_OS_ID}.gz" # repacked ramdisk file
 readonly BRP_JUN_PATCH="${BRP_USER_DIR}/jun.patch" # jun.patch
-readonly BRP_RD_COMPRESSED=$(brp_json_get_field "${BRP_REL_CONFIG_JSON}" "extra.compress_rd")
 
 #rm -rf build/testing/rd-* # for debugging ramdisk routines; also comment-out rm of BRP_URD_DIR
 #rm "${BRP_RD_REPACK}" # for testing
@@ -384,6 +339,8 @@ if [ ! -f "${BRP_RD_REPACK}" ]; then # do we even need to unpack-modify-repack t
   fi
 
   # Finally, we can finish ramdisk modifications with repacking it
+  readonly BRP_RD_COMPRESSED=$(brp_json_get_field "${BRP_REL_CONFIG_JSON}" "extra.compress_rd")
+
   if [ "${BRP_JUN_MOD}" -eq 1 ]; then
     cp ${BRP_RD_FILE} ${BRP_RD_REPACK}
   else
@@ -439,16 +396,16 @@ if [[ "${BRP_DEV_DISABLE_EXTS}" -ne 1 ]]; then
   brp_mkdir "${RPT_IMG_EXTS_DIR}"
   if [[ -z "${RPT_BUILD_EXTS}" ]]; then
     pr_dbg "Dumping all extensions for %s to %s" "${BRP_REL_OS_ID}" "${RPT_IMG_EXTS_DIR}"
-    ( ./ext-manager.sh _dump_exts "${platkver}" "${RPT_IMG_EXTS_DIR}")
+    ( ./ext-manager.sh _dump_exts "${BRP_REL_OS_ID}" "${RPT_IMG_EXTS_DIR}")
     if [[ $? -ne 0 ]]; then
       pr_crit "Failed to dump all extensions for %s platform to %s - see errors above" "${BRP_REL_OS_ID}" "${RPT_IMG_EXTS_DIR}"
     fi
   else
     pr_dbg "Dumping selected extensions (%s) for %s to %s" "${RPT_BUILD_EXTS}" "${BRP_REL_OS_ID}" "${RPT_IMG_EXTS_DIR}"
-    ( ./ext-manager.sh _dump_exts "${platkver}" "${RPT_IMG_EXTS_DIR}" "${RPT_BUILD_EXTS}")
+    ( ./ext-manager.sh _dump_exts "${BRP_REL_OS_ID}" "${RPT_IMG_EXTS_DIR}" "${RPT_BUILD_EXTS}")
     if [[ $? -ne 0 ]]; then
       pr_crit "Failed to dump extensions selected (%s) for %s platform to %s - see errors above" \
-              "${RPT_BUILD_EXTS}" "${platkver}" "${RPT_IMG_EXTS_DIR}"
+              "${RPT_BUILD_EXTS}" "${BRP_REL_OS_ID}" "${RPT_IMG_EXTS_DIR}"
     fi
   fi
   pr_process_ok
@@ -491,14 +448,10 @@ brp_generate_grub_conf "${BRP_REL_CONFIG_JSON}" "${BRP_USER_CFG}" BRP_RELEASE_PA
 pr_process_ok
 
 ##### CREATE FINAL LOADER IMAGE ########################################################################################
-#pr_process "Creating loader image at %s" "${BRP_OUTPUT_FILE}"
-#brp_unpack_single_gz "${BRP_BOOT_IMAGE}" "${BRP_OUTPUT_FILE}"
-#readonly BRP_OUT_P1="$(brp_mount_img_partitions "${BRP_OUTPUT_FILE}" 1 "${BRP_BUILD_DIR}/img-mnt")" # partition 1 of img
-#readonly BRP_OUT_P2="$(brp_mount_img_partitions "${BRP_OUTPUT_FILE}" 2 "${BRP_BUILD_DIR}/img-mnt")" # partition 2 of img
-
-# Add patched zImage, patched ramdisk and our GRUB config for new mshell (dont make loader.img 2023.10.26)
-readonly BRP_OUT_P1="/mnt/${BRP_LOADER_DISK}1" 
-readonly BRP_OUT_P2="/mnt/${BRP_LOADER_DISK}2" 
+pr_process "Creating loader image at %s" "${BRP_OUTPUT_FILE}"
+brp_unpack_single_gz "${BRP_BOOT_IMAGE}" "${BRP_OUTPUT_FILE}"
+readonly BRP_OUT_P1="$(brp_mount_img_partitions "${BRP_OUTPUT_FILE}" 1 "${BRP_BUILD_DIR}/img-mnt")" # partition 1 of img
+readonly BRP_OUT_P2="$(brp_mount_img_partitions "${BRP_OUTPUT_FILE}" 2 "${BRP_BUILD_DIR}/img-mnt")" # partition 2 of img
 readonly BRP_ZLINMOD_NAME="zImage" # name of the linux kernel in the final image
 readonly BRP_RDMOD_NAME="rd.gz" # name of the ramdisk in the final image
 
@@ -518,18 +471,14 @@ fi
 # Add patched zImage, patched ramdisk and our GRUB config
 pr_dbg "Copying patched files"
 brp_cp_flat "${BRP_ZLINUX_PATCHED_FILE}" "${BRP_OUT_P1}/${BRP_ZLINMOD_NAME}"
-#brp_cp_flat "${BRP_RD_REPACK}" "${BRP_OUT_P1}/${BRP_RDMOD_NAME}"
-brp_cp_flat "${BRP_RD_REPACK}" "/mnt/${BRP_LOADER_DISK}3/${BRP_RDMOD_NAME}"
-#brp_cp_flat "${BRP_CUSTOM_RD_PATH}" "${BRP_OUT_P1}/${BRP_CUSTOM_RD_NAME}"
-brp_cp_flat "${BRP_CUSTOM_RD_PATH}" "/mnt/${BRP_LOADER_DISK}3/${BRP_CUSTOM_RD_NAME}"
-#brp_cp_flat "${BRP_TMP_GRUB_CONF}" "${BRP_OUT_P1}/boot/grub/grub.cfg"
-brp_cp_flat "${BRP_TMP_GRUB_CONF}" "/tmp/grub.cfg"
-
+brp_cp_flat "${BRP_RD_REPACK}" "${BRP_OUT_P1}/${BRP_RDMOD_NAME}"
+brp_cp_flat "${BRP_CUSTOM_RD_PATH}" "${BRP_OUT_P1}/${BRP_CUSTOM_RD_NAME}"
+brp_cp_flat "${BRP_TMP_GRUB_CONF}" "${BRP_OUT_P1}/boot/grub/grub.cfg"
 pr_process_ok
 
 ##### CLEANUP ##########################################################################################################
 pr_process "Cleaning up"
-#brp_detach_image "${BRP_OUTPUT_FILE}"
+brp_detach_image "${BRP_OUTPUT_FILE}"
 if [ "${BRP_KEEP_BUILD}" -eq 0 ]; then
   "${RM_PATH}" -rf "${BRP_BUILD_DIR}"
 fi
