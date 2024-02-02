@@ -292,17 +292,9 @@ mrp_validate_recipe_file()
   brp_read_kv_to_array "${3}" "scripts" scripts_kv # we don't care about the order read here
   for scr_name in "${!scripts_kv[@]}"; do
     case "${scr_name}" in
-      on_early)
-        ;;
-      on_jrExit)
-        ;;
       on_boot)
         ;;
-      on_patches)
-        ;;
       on_os_load)
-        ;;
-      on_rcExit)
         ;;
       check_kmod)
         if [[ "$(brp_json_has_field "${3}" 'kmods')" -ne '1' ]]; then
@@ -885,18 +877,6 @@ __action__update_platform_exts()
 
     mrp_fill_recipe "${ext_id}" "${platform_id}" "${new_recipe_file}"
     "${RM_PATH}" "${new_recipe_file}" || pr_warn "Failed to remove temp file %s" "${new_recipe_file}"
-
-    # Modify storagepanel addon scripts & sha256 2023.08.24
-    if [[ "${ext_id}" == "storagepanel" ]]; then
-      BAYSIZE=$(jq -r -e '.general.bay' "/home/tc/user_config.json")
-      pr_dbg "Storage Panel(Bay Size) is ${BAYSIZE}, Modify storagepanel addon scripts & sha256 2023.11.07"
-      sed -i 's/HDD_BAY="'"RACK_60_Bay"'"/HDD_BAY="'"${BAYSIZE}"'"/g' "${RPT_EXTS_DIR}/${ext_id}/${platform_id}/install.sh"
-      sed -i "s/storagepanel.sh RACK_60_Bay 1X2/storagepanel.sh ${BAYSIZE} 1X4/g" "${RPT_EXTS_DIR}/${ext_id}/${platform_id}/install.sh"
-      shell_sha256=$(sha256sum ${RPT_EXTS_DIR}/${ext_id}/${platform_id}/install.sh | awk '{print $1}')
-      pr_dbg "storagepanel install.sh file  sha256sum is : $shell_sha256"
-      pr_dbg "Editing ${platform_id}.json file !!!"
-      sed -i "s/c524aeed07f8aa91a97735d31cf0c5014e67900ed60f643e929e0cee1b8cb060/$shell_sha256/g" ${RPT_EXTS_DIR}/${ext_id}/${platform_id}/${platform_id}.json
-    fi
 
   done
 
