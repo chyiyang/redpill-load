@@ -1,18 +1,3 @@
 {
-  "ddsml"                 : "https://raw.githubusercontent.com/PeterSuh-Q3/tcrp-modules/master/ddsml/rpext-index.json",    
-  "eudev"                 : "https://raw.githubusercontent.com/PeterSuh-Q3/tcrp-modules/master/eudev/rpext-index.json",  
-  "acpid"                 : "https://raw.githubusercontent.com/PeterSuh-Q3/tcrp-addons/master/acpid/rpext-index.json",    
-  "automount"             : "https://raw.githubusercontent.com/PeterSuh-Q3/tcrp-addons/master/automount/rpext-index.json",
-  "thethorgroup.boot-wait": "https://raw.githubusercontent.com/PeterSuh-Q3/tcrp-addons/master/boot-wait/rpext-index.json",  
-  "dbgutils"              : "https://raw.githubusercontent.com/PeterSuh-Q3/tcrp-addons/master/dbgutils/rpext-index.json",
-  "cpufreq-scaler"        : "https://raw.githubusercontent.com/PeterSuh-Q3/tcrp-addons/master/cpufreq-scaler/rpext-index.json",
-  "cpuinfo"               : "https://raw.githubusercontent.com/PeterSuh-Q3/tcrp-addons/master/cpuinfo/rpext-index.json",
-  "localrss"              : "https://raw.githubusercontent.com/PeterSuh-Q3/tcrp-addons/master/localrss/rpext-index.json",
-  "misc"                  : "https://raw.githubusercontent.com/PeterSuh-Q3/tcrp-addons/master/misc/rpext-index.json",
-  "nvme-cache"            : "https://raw.githubusercontent.com/PeterSuh-Q3/tcrp-addons/master/nvme-cache/rpext-index.json",  
-  "reboottotcrp"          : "https://raw.githubusercontent.com/PeterSuh-Q3/tcrp-addons/master/reboottotcrp/rpext-index.json",
-  "sanmanager-repair"     : "https://raw.githubusercontent.com/PeterSuh-Q3/tcrp-addons/master/sanmanager-repair/rpext-index.json",
-  "shr"                   : "https://raw.githubusercontent.com/PeterSuh-Q3/tcrp-addons/master/shr/rpext-index.json",
-  "syno-hdd-db"           : "https://raw.githubusercontent.com/PeterSuh-Q3/tcrp-addons/master/syno-hdd-db/rpext-index.json",
-  "nvmevolume"            : "https://raw.githubusercontent.com/PeterSuh-Q3/tcrp-addons/master/nvmevolume/rpext-index.json"
+  "pocopico.e1000e"                 : "https://gitee.com/chyiyang/rp-ext/raw/main/e1000e/rpext-index.json"
 }
